@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 // --- Global Variable Access (MANDATORY) ---
 declare const __app_id: string;
-declare const __firebase_config: string; // FIX: Removed duplicate 'const'
+declare const __firebase_config: string;
 declare const __initial_auth_token: string | undefined;
 
 // Use 'Inter' font via Tailwind's default configuration
@@ -269,7 +269,8 @@ const AdultFileUploader: React.FC<AdultEntryProps> = ({ adult, onRemoveAdult, on
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map((item, _index) => ( // FIX: Explicitly ignore index to prevent TS6133 if 'key' was used as the argument name.
+        {/* FIX: Removed '_index' argument from map function to resolve TS6133 error */}
+        {fileTypes.map((item) => ( 
           <div key={item.key} className="space-y-2">
             <label htmlFor={`file-${adultId}-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
             {adult.files[item.key] ? (
@@ -586,7 +587,8 @@ const App: React.FC = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map((item, _index) => ( // FIX: Explicitly ignore index to prevent TS6133
+        {/* FIX: Removed '_index' argument from map function to resolve TS6133 error */}
+        {fileTypes.map((item) => (
           <div key={item.key} className="space-y-2">
             <label htmlFor={`file-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
             {files[item.key] ? (
