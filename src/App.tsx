@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 // @ts-ignore
 import { initializeApp } from 'firebase/app';
 // @ts-ignore
-import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, Auth, User } from 'firebase/auth';
+import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, User } from 'firebase/auth';
 // @ts-ignore
 import { getFirestore, doc, setDoc, onSnapshot, Firestore, Unsubscribe, DocumentSnapshot, FirebaseError } from 'firebase/firestore';
 // @ts-ignore
@@ -309,7 +309,7 @@ const AdultFileUploader: React.FC<AdultEntryProps> = ({ adult, onRemoveAdult, on
 const App: React.FC = () => {
   const [applicationData, setApplicationData] = useState<ApplicationData>(initialApplicationData);
   const [db, setDb] = useState<Firestore | null>(null);
-  const [auth, setAuth] = useState<Auth | null>(null);
+  // Removed 'auth' from state as it's only needed for initialization in useEffect
   const [userId, setUserId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -337,7 +337,7 @@ const App: React.FC = () => {
       const firestore = getFirestore(app);
       const authInstance = getAuth(app);
       setDb(firestore);
-      setAuth(authInstance);
+      // Removed setAuth(authInstance);
 
       const handleAuth = async () => {
         try {
@@ -469,7 +469,6 @@ const App: React.FC = () => {
     }));
   }, []);
 
-  // ** FIX for HOOKS VIOLATION: Extracted onRemoveFile from renderFileUploadSection **
   // File removal handler for the main applicant only, used by FileDisplay component
   const handleRemoveMainApplicantFile = useCallback((fileTypeLabel: keyof IdFile) => {
     setApplicationData(prev => ({
@@ -574,14 +573,12 @@ const App: React.FC = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map(({ key, label }) => (
-          // FIX: The unused 'key' parameter error (TS6133) was actually from the object destructuring 
-          // in the map callback which I fixed in the previous response.
-          <div key={key} className="space-y-2">
-            <label htmlFor={`file-${key}`} className="block text-sm font-semibold text-gray-700">{label}</label>
-            {files[key] ? (
+        {fileTypes.map(({ key: fileKey, label }) => ( // Renamed 'key' to 'fileKey'
+          <div key={fileKey} className="space-y-2">
+            <label htmlFor={`file-${fileKey}`} className="block text-sm font-semibold text-gray-700">{label}</label>
+            {files[fileKey] ? (
               <FileDisplay
-                file={files[key]}
+                file={files[fileKey]}
                 fileTypeLabel={label}
                 // Using the top-level, consistent hook here:
                 onRemoveFile={handleRemoveMainApplicantFile} 
@@ -589,10 +586,10 @@ const App: React.FC = () => {
             ) : (
               <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-24 p-4 hover:border-sky-500 transition-colors cursor-pointer relative">
                 <input
-                  id={`file-${key}`}
+                  id={`file-${fileKey}`}
                   type="file"
                   accept="image/*,application/pdf"
-                  onChange={(e) => handleMainApplicantFileChange(e, key)}
+                  onChange={(e) => handleMainApplicantFileChange(e, fileKey)}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   required
                 />
