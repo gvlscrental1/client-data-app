@@ -269,29 +269,29 @@ const AdultFileUploader: React.FC<AdultEntryProps> = ({ adult, onRemoveAdult, on
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map(({ key, label }) => (
-          <div key={key} className="space-y-2">
-            <label htmlFor={`file-${adultId}-${key}`} className="block text-sm font-semibold text-gray-700">{label}</label>
-            {adult.files[key] ? (
+        {fileTypes.map((item) => ( // FIXED: Using direct property access
+          <div key={item.key} className="space-y-2">
+            <label htmlFor={`file-${adultId}-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
+            {adult.files[item.key] ? (
               <FileDisplay
-                file={adult.files[key]}
-                fileTypeLabel={label}
+                file={adult.files[item.key]}
+                fileTypeLabel={item.label}
                 onRemoveFile={handleRemoveFile}
               />
             ) : (
               <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-24 p-4 hover:border-sky-500 transition-colors cursor-pointer relative">
                 <input
-                  id={`file-${adultId}-${key}`}
+                  id={`file-${adultId}-${item.key}`}
                   type="file"
                   accept="image/*,application/pdf"
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFileChange(e, key, adultId)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => onFileChange(e, item.key, adultId)}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   required
                 />
                 <div className="text-center text-gray-500">
                   <Upload className="w-5 h-5 mx-auto mb-1 text-sky-500" />
                   <p className="text-xs">Click to Upload</p>
-                  <p className="text-xs font-medium text-sky-600">{label}</p>
+                  <p className="text-xs font-medium text-sky-600">{item.label}</p>
                 </div>
               </div>
             )}
@@ -309,7 +309,6 @@ const AdultFileUploader: React.FC<AdultEntryProps> = ({ adult, onRemoveAdult, on
 const App: React.FC = () => {
   const [applicationData, setApplicationData] = useState<ApplicationData>(initialApplicationData);
   const [db, setDb] = useState<Firestore | null>(null);
-  // Removed 'auth' from state as it's only needed for initialization in useEffect
   const [userId, setUserId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReady, setIsReady] = useState(false);
@@ -337,7 +336,6 @@ const App: React.FC = () => {
       const firestore = getFirestore(app);
       const authInstance = getAuth(app);
       setDb(firestore);
-      // Removed setAuth(authInstance);
 
       const handleAuth = async () => {
         try {
@@ -573,30 +571,30 @@ const App: React.FC = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map(({ key: fileKey, label }) => ( // Renamed 'key' to 'fileKey'
-          <div key={fileKey} className="space-y-2">
-            <label htmlFor={`file-${fileKey}`} className="block text-sm font-semibold text-gray-700">{label}</label>
-            {files[fileKey] ? (
+        {fileTypes.map((item) => ( // FIXED: Using direct property access to avoid TS6133 'key' error
+          <div key={item.key} className="space-y-2">
+            <label htmlFor={`file-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
+            {files[item.key] ? (
               <FileDisplay
-                file={files[fileKey]}
-                fileTypeLabel={label}
+                file={files[item.key]}
+                fileTypeLabel={item.label}
                 // Using the top-level, consistent hook here:
                 onRemoveFile={handleRemoveMainApplicantFile} 
               />
             ) : (
               <div className="flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg h-24 p-4 hover:border-sky-500 transition-colors cursor-pointer relative">
                 <input
-                  id={`file-${fileKey}`}
+                  id={`file-${item.key}`}
                   type="file"
                   accept="image/*,application/pdf"
-                  onChange={(e) => handleMainApplicantFileChange(e, fileKey)}
+                  onChange={(e) => handleMainApplicantFileChange(e, item.key)}
                   className="absolute inset-0 opacity-0 cursor-pointer"
                   required
                 />
                 <div className="text-center text-gray-500">
                   <Upload className="w-5 h-5 mx-auto mb-1 text-sky-500" />
                   <p className="text-xs">Click to Upload</p>
-                  <p className="text-xs font-medium text-sky-600">{label}</p>
+                  <p className="text-xs font-medium text-sky-600">{item.label}</p>
                 </div>
               </div>
             )}
