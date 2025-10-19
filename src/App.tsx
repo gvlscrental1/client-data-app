@@ -350,14 +350,17 @@ const App: React.FC = () => {
       };
       handleAuth();
 
+      // FIX 1: Only set isReady and userId upon successful authentication (user is not null)
       const unsubscribe = onAuthStateChanged(authInstance, (user: User | null) => {
-        if (user) {
+        if (user && user.uid) {
           setUserId(user.uid);
           console.log(`User authenticated with ID: ${user.uid}`);
+          setIsReady(true); // Only mark ready after successful auth
         } else {
-          setUserId(crypto.randomUUID()); // Anonymous or fallback ID
+          // If auth fails, do not set isReady=true, keeping the app in a safe loading state
+          console.error("Authentication check complete, but no valid user found. Data access disabled.");
+          setUserId(null); 
         }
-        setIsReady(true);
       });
 
       return () => {
@@ -373,39 +376,51 @@ const App: React.FC = () => {
   // ----------------------------------------------------------------
   useEffect(() => {
     let unsubscribe: Unsubscribe | undefined;
+    let timeoutId: number | undefined;
     
     if (db && userId && isReady) {
       // The path structure is: collection/document/collection/document/collection/document (6 segments = valid)
       const docPath = `/artifacts/${appId}/users/${userId}/leaseApplication/main`;
       const applicationDocRef = doc(db, docPath);
+      console.log(`Attempting to subscribe to: ${docPath}`);
 
-      // FIX: Explicitly type docSnapshot and error
-      unsubscribe = onSnapshot(applicationDocRef, (docSnapshot: DocumentSnapshot) => {
-        if (docSnapshot.exists()) {
-          const data = docSnapshot.data() as ApplicationData;
-          // IMPORTANT: Handle data structure integrity, especially for arrays which might be empty
-          // in Firestore but we expect at least one entry for the form fields.
-          const loadedData: ApplicationData = {
-              ...data,
-              rentalHistory: data.rentalHistory && data.rentalHistory.length > 0 ? data.rentalHistory : [initialHistoryEntry],
-              employmentHistory: data.employmentHistory && data.employmentHistory.length > 0 ? data.employmentHistory : [initialEmploymentEntry],
-              // Ensure files are not re-assigned from non-File objects
-              mainApplicantIdFiles: {
-                  driverLicense: null,
-                  passport: null,
-                  other: null,
-              },
-              otherAdults: data.otherAdults || [],
-          };
-          setApplicationData(loadedData);
-          console.log("Application data loaded from Firestore.");
-        }
-      }, (error: FirebaseError) => { // FIX: Explicitly type error
-        console.error("Error subscribing to application data:", error);
-      });
+      // FIX 2: Add a small delay to prevent the race condition between auth token update and Firestore read
+      timeoutId = window.setTimeout(() => {
+        // FIX: Explicitly type docSnapshot and error
+        unsubscribe = onSnapshot(applicationDocRef, (docSnapshot: DocumentSnapshot) => {
+          if (docSnapshot.exists()) {
+            const data = docSnapshot.data() as ApplicationData;
+            // IMPORTANT: Handle data structure integrity, especially for arrays which might be empty
+            // in Firestore but we expect at least one entry for the form fields.
+            const loadedData: ApplicationData = {
+                ...data,
+                rentalHistory: data.rentalHistory && data.rentalHistory.length > 0 ? data.rentalHistory : [initialHistoryEntry],
+                employmentHistory: data.employmentHistory && data.employmentHistory.length > 0 ? data.employmentHistory : [initialEmploymentEntry],
+                // Ensure files are not re-assigned from non-File objects
+                mainApplicantIdFiles: {
+                    driverLicense: null,
+                    passport: null,
+                    other: null,
+                },
+                otherAdults: data.otherAdults || [],
+            };
+            setApplicationData(loadedData);
+            console.log("Application data loaded from Firestore.");
+          }
+        }, (error: FirebaseError) => { // FIX: Explicitly type error
+          if (error.code === 'permission-denied') {
+            console.error("Permission denied. Ensure Firebase security rules are correct for the user path.");
+          }
+          console.error("Error subscribing to application data:", error);
+        });
+      }, 50); // 50ms delay
+
     }
 
     return () => {
+      if (timeoutId !== undefined) {
+          window.clearTimeout(timeoutId);
+      }
       if (unsubscribe) unsubscribe();
     };
   }, [db, userId, appId, isReady]);
@@ -571,7 +586,7 @@ const App: React.FC = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map((item, _key) => ( // FIX: Using _key to ignore the unused key variable
+        {fileTypes.map((item) => ( 
           <div key={item.key} className="space-y-2">
             <label htmlFor={`file-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
             {files[item.key] ? (
