@@ -269,7 +269,7 @@ const AdultFileUploader: React.FC<AdultEntryProps> = ({ adult, onRemoveAdult, on
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map((item) => ( // FIXED: Using direct property access
+        {fileTypes.map((item) => ( 
           <div key={item.key} className="space-y-2">
             <label htmlFor={`file-${adultId}-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
             {adult.files[item.key] ? (
@@ -571,7 +571,7 @@ const App: React.FC = () => {
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {fileTypes.map((item) => ( // FIXED: Using direct property access to avoid TS6133 'key' error
+        {fileTypes.map((item, _key) => ( // FIX: Using _key to ignore the unused key variable
           <div key={item.key} className="space-y-2">
             <label htmlFor={`file-${item.key}`} className="block text-sm font-semibold text-gray-700">{item.label}</label>
             {files[item.key] ? (
