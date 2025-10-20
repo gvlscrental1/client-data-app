@@ -543,7 +543,7 @@ const App: React.FC = () => {
 
     // Filter out File objects before saving to Firestore, as they are not serializable.
     // We replace File objects with simple metadata to signify their existence.
-    const serializableData: ApplicationData = JSON.parse(JSON.stringify(applicationData, (key: string, value: any) => {
+    const serializableData: ApplicationData = JSON.parse(JSON.stringify(applicationData, (_key: string, value: any) => {
         // Exclude File objects from serialization.
         if (value instanceof File) {
             return {
