@@ -7,6 +7,10 @@ backend:
         - npx ampx pipeline-deploy --branch $AWS_BRANCH --app-id $AWS_APP_ID
 frontend:
   phases:
+    preBuild:
+      commands:
+        - npm ci
+        - amplify pull --appId d1fvnin6iinphf --envName dev --yes
     build:
       commands:
         - npm run build
