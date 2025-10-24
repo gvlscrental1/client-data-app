@@ -1,35 +1,41 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { v4 as uuidv4 } from "uuid";
-import {
-  Button,
-  Loader,
-  withAuthenticator,
-  View,
-  Heading,
-} from "@aws-amplify/ui-react";
-import { DataStore } from "aws-amplify/datastore";
-import { Auth } from "aws-amplify";
-import { Loader2, Upload, Trash2, FileText, X, Plus, Minus, UserPlus } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
+import { withAuthenticator, View, Heading } from "@aws-amplify/ui-react";
+import { Amplify, Auth, DataStore } from "aws-amplify";
 import "./index.css";
 
-// --- Types and UI setup (same as before) ---
-const buttonStyles = "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 ease-in-out shadow-md";
-const inputStyles = "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors";
+// --- Styles ---
+const buttonStyles =
+  "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 ease-in-out shadow-md";
+const inputStyles =
+  "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors";
 const containerStyles = "bg-white p-6 rounded-xl shadow-2xl space-y-6";
 
-// Your existing interfaces and initial states here...
-// (Keep your HistoryEntry, EmploymentEntry, IdFile, Adult, ApplicationData, etc. definitions unchanged)
+// --- Types ---
+interface ApplicationData {
+  name: string;
+  age: number;
+  // Add other fields your app needs
+}
+
+const initialApplicationData: ApplicationData = {
+  name: "",
+  age: 0,
+  // Initialize other fields here
+};
 
 // =================================================================
-// MAIN APPLICATION COMPONENT (AMPLIFY VERSION)
+// MAIN APP COMPONENT
 // =================================================================
 const App: React.FC = () => {
-  const [applicationData, setApplicationData] = useState<ApplicationData>(initialApplicationData);
+  const [applicationData, setApplicationData] = useState<ApplicationData>(
+    initialApplicationData
+  );
   const [userId, setUserId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // 1️⃣ Authenticate with Amplify Auth (Cognito)
+  // Authenticate user
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -44,14 +50,14 @@ const App: React.FC = () => {
     initAuth();
   }, []);
 
-  // 2️⃣ Save Data to Amplify DataStore or API (instead of Firestore)
+  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       console.log("Submitting data:", applicationData);
-      // Example: Save to API or DynamoDB via AppSync mutation
-      // await API.graphql({ query: mutations.createApplication, variables: { input: applicationData } });
+      // Example: save to DataStore or API
+      // await DataStore.save(new ApplicationModel(applicationData));
       console.log("Saved successfully.");
     } catch (err) {
       console.error("Error saving data:", err);
@@ -73,14 +79,18 @@ const App: React.FC = () => {
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-inter">
       <div className="max-w-4xl mx-auto">
         <header className="text-center mb-10">
-          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">Rental Application</h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">
+            Rental Application
+          </h1>
           <p className="mt-2 text-lg text-gray-500">Powered by AWS Amplify</p>
-          {userId && <p className="mt-1 text-xs text-gray-400">User ID: {userId}</p>}
+          {userId && (
+            <p className="mt-1 text-xs text-gray-400">User ID: {userId}</p>
+          )}
         </header>
 
-        {/* Your existing form JSX unchanged, except handleSubmit now calls Amplify */}
         <form onSubmit={handleSubmit} className="space-y-10">
-          {/* ... all your form sections here ... */}
+          {/* Add your form fields here */}
+
           <div className="pt-6">
             <button
               type="submit"
@@ -103,5 +113,4 @@ const App: React.FC = () => {
   );
 };
 
-// Export with Amplify Authenticator (for login)
 export default withAuthenticator(App);

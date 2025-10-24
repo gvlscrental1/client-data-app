@@ -1,22 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import App from "./App";
 import "./index.css";
 import { Amplify } from "aws-amplify";
+import awsExports from "./aws-exports"; // modern Amplify uses aws-exports.js
 
-// ✅ For Amplify Gen 1 (amplifyconfiguration.json is generated under /src)
-//import amplifyConfig from './amplifyconfiguration.json';
-import { Amplify } from "aws-amplify";
-import amplifyConfig from "./amplifyconfiguration.json";
-Amplify.configure(amplifyConfig);
-
-
-// ⚙️ For Amplify Gen 2 (if using the new Amplify Console builds, uncomment below instead)
-// import outputs from "../amplify_outputs.json";
-// Amplify.configure(outputs);
-
-// Configure Amplify (Gen 1 default)
-Amplify.configure(amplifyConfig);
+// Configure Amplify once
+Amplify.configure(awsExports);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
