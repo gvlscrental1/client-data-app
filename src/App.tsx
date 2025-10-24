@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { withAuthenticator, View, Heading } from "@aws-amplify/ui-react";
-import { Amplify, Auth, DataStore } from "aws-amplify";
+//import { Amplify, Auth, DataStore } from "aws-amplify"; // this does not work with v6
+import { Amplify } from "aws-amplify";
+import * as Auth from "@aws-amplify/auth";
+import * as DataStore from "@aws-amplify/datastore";
 import "./index.css";
 
 // --- Styles ---
