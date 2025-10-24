@@ -10,7 +10,7 @@ frontend:
     preBuild:
       commands:
         - npm ci
-        - amplify pull --appId d1fvnin6iinphf --envName dev --yes
+        - amplify pull --appId $AWS_APP_ID --envName dev --yes
     build:
       commands:
         - npm run build
