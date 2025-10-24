@@ -3,12 +3,16 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { Amplify } from "aws-amplify";
-import amplifyConfig from "./amplifyconfiguration.json"; //This is for Gen1 Amplify. and if main.tsx is in src folder.
-//import outputs from "../amplify_outputs.json"; //This is for Gen2 Amplify.
-//import amplifyConfig from "../amplifyconfiguration.json"; //This is for Gen1 Amplify and if main.tsx is in root folder.
 
-//Amplify.configure(outputs);//This is for Gen2 Amplify.
-Amplify.configure(amplifyConfig); //This is for Gen1 Amplify.
+// ✅ For Amplify Gen 1 (amplifyconfiguration.json is generated under /src)
+import amplifyConfig from "./amplifyconfiguration.json";
+
+// ⚙️ For Amplify Gen 2 (if using the new Amplify Console builds, uncomment below instead)
+// import outputs from "../amplify_outputs.json";
+// Amplify.configure(outputs);
+
+// Configure Amplify (Gen 1 default)
+Amplify.configure(amplifyConfig);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
