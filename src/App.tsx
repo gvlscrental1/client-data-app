@@ -4,6 +4,7 @@ import { withAuthenticator, View, Heading } from "@aws-amplify/ui-react";
 //import { Amplify, Auth, DataStore } from "aws-amplify"; // this does not work with v6
 import { Amplify } from "aws-amplify";
 import * as Auth from "@aws-amplify/auth";
+import { currentAuthenticatedUser } from "@aws-amplify/auth";
 import * as DataStore from "@aws-amplify/datastore";
 import "./index.css";
 
@@ -13,6 +14,7 @@ const buttonStyles =
 const inputStyles =
   "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors";
 const containerStyles = "bg-white p-6 rounded-xl shadow-2xl space-y-6";
+const user = await currentAuthenticatedUser();
 
 // --- Types ---
 interface ApplicationData {
@@ -31,11 +33,11 @@ const initialApplicationData: ApplicationData = {
 // MAIN APP COMPONENT
 // =================================================================
 const App: React.FC = () => {
-  const [applicationData, setApplicationData] = useState<ApplicationData>(
-    initialApplicationData
-  );
+  //const [applicationData, setApplicationData] = useState<ApplicationData>(	//commented on 25OCT2025.
+  //  initialApplicationData													//commented on 25OCT2025.
+  //);																			//commented on 25OCT2025.
   const [userId, setUserId] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  //const [isSubmitting, setIsSubmitting] = useState(false);					//commented on 25OCT2025.
   const [isReady, setIsReady] = useState(false);
 
   // Authenticate user
