@@ -1,68 +1,55 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { withAuthenticator, View, Heading } from "@aws-amplify/ui-react";
-//import { Amplify, Auth, DataStore } from "aws-amplify"; // this does not work with v6
 import { Amplify } from "aws-amplify";
-import * as Auth from "@aws-amplify/auth";
-import { currentAuthenticatedUser } from "@aws-amplify/auth";
-import * as DataStore from "@aws-amplify/datastore";
+import { fetchAuthSession, getCurrentUser } from "aws-amplify/auth";
 import "./index.css";
 
-// --- Styles ---
-const buttonStyles =
-  "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-150 ease-in-out shadow-md";
-const inputStyles =
-  "w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors";
-const containerStyles = "bg-white p-6 rounded-xl shadow-2xl space-y-6";
-const user = await currentAuthenticatedUser();
-
-// --- Types ---
+// ----------------------
+// Types
+// ----------------------
 interface ApplicationData {
   name: string;
   age: number;
-  // Add other fields your app needs
 }
 
 const initialApplicationData: ApplicationData = {
   name: "",
   age: 0,
-  // Initialize other fields here
 };
 
-// =================================================================
-// MAIN APP COMPONENT
-// =================================================================
+// ----------------------
+// Component
+// ----------------------
 const App: React.FC = () => {
-  //const [applicationData, setApplicationData] = useState<ApplicationData>(	//commented on 25OCT2025.
-  //  initialApplicationData													//commented on 25OCT2025.
-  //);																			//commented on 25OCT2025.
+  const [applicationData, setApplicationData] = useState<ApplicationData>(initialApplicationData);
   const [userId, setUserId] = useState<string | null>(null);
-  //const [isSubmitting, setIsSubmitting] = useState(false);					//commented on 25OCT2025.
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isReady, setIsReady] = useState(false);
 
-  // Authenticate user
+  // 1️⃣ Get current user (Amplify v6 Auth API)
   useEffect(() => {
     const initAuth = async () => {
       try {
-        const user = await Auth.currentAuthenticatedUser();
+        const user = await getCurrentUser();
         setUserId(user.username);
-        setIsReady(true);
       } catch (error) {
-        console.error("Auth error:", error);
-        setIsReady(true); // still load UI if not signed in
+        console.warn("User not signed in:", error);
+      } finally {
+        setIsReady(true);
       }
     };
     initAuth();
   }, []);
 
-  // Handle form submission
+  // 2️⃣ Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
       console.log("Submitting data:", applicationData);
-      // Example: save to DataStore or API
-      // await DataStore.save(new ApplicationModel(applicationData));
+      // Replace this with your Amplify API / DataStore logic
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       console.log("Saved successfully.");
     } catch (err) {
       console.error("Error saving data:", err);
@@ -80,6 +67,7 @@ const App: React.FC = () => {
     );
   }
 
+  // 3️⃣ UI
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 font-inter">
       <div className="max-w-4xl mx-auto">
@@ -88,19 +76,46 @@ const App: React.FC = () => {
             Rental Application
           </h1>
           <p className="mt-2 text-lg text-gray-500">Powered by AWS Amplify</p>
-          {userId && (
-            <p className="mt-1 text-xs text-gray-400">User ID: {userId}</p>
-          )}
+          {userId && <p className="mt-1 text-xs text-gray-400">User ID: {userId}</p>}
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-10">
-          {/* Add your form fields here */}
+          <div>
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Name
+            </label>
+            <input
+              type="text"
+              value={applicationData.name}
+              onChange={(e) =>
+                setApplicationData({ ...applicationData, name: e.target.value })
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-gray-700 text-sm font-medium mb-2">
+              Age
+            </label>
+            <input
+              type="number"
+              value={applicationData.age}
+              onChange={(e) =>
+                setApplicationData({
+                  ...applicationData,
+                  age: Number(e.target.value),
+                })
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500"
+            />
+          </div>
 
           <div className="pt-6">
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`${buttonStyles} w-full text-lg bg-sky-600 hover:bg-sky-700 text-white disabled:bg-sky-300 disabled:cursor-not-allowed flex items-center justify-center`}
+              className="w-full text-lg bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-lg shadow-md disabled:bg-sky-300 flex items-center justify-center"
             >
               {isSubmitting ? (
                 <>
@@ -118,4 +133,5 @@ const App: React.FC = () => {
   );
 };
 
+// Export with Amplify Authenticator
 export default withAuthenticator(App);
